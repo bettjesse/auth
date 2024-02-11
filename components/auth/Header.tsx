@@ -1,8 +1,13 @@
-import { font } from "@/app/page"
+
 import { cn } from "@/lib/utils"
 
-
+import { Poppins } from "next/font/google"
+const font = Poppins({
+  subsets: ["latin"],
+  weight: ["600"]
+})
 interface HeaderProps {
+
     label : string
 }
 const Header = ({label}:HeaderProps) => {

@@ -2,14 +2,21 @@
 import CardWrapper from "@/components/auth/CardWrapper"
 import { useForm } from "react-hook-form"
 import { LoginSchema } from "@/schemas"
+import { useState, useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Form, FormControl, FormLabel, FormField, FormItem, FormMessage
 } from "@/components/ui/form"
 import * as z from "zod"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import FormError from "@/components/FormError"
+import { login } from "@/actions/login"
+import FormSucess from "@/components/FormSuccess"
 const LoginForm = () => {
-
+const [ispending, startTransition] = useTransition()
+const [error, setError ]= useState<string  | undefined>("")
+const [success, setSuccess ]= useState<string  | undefined>("")
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -17,6 +24,37 @@ const LoginForm = () => {
       password: ""
     }
   })
+
+  // const onSubmit = (values: z.infer <typeof LoginSchema>)=> {
+  //   setError("")
+  //   setSuccess("")
+  //   startTransition(()=> {
+  //     login(values)
+  //     .then ((data)=> {
+  //         setError(data.error)  
+  //         setSuccess(data.success)
+  //     })
+  //   })
+
+  // }
+
+  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
+    setError("");
+    setSuccess("");
+  
+    try {
+       startTransition(async () => {
+        const data = await login(values);
+        setError(data?.error);
+        setSuccess(data?.success);
+      });
+    } catch (error) {
+      // Handle errors here
+      console.error("An error occurred:", error);
+    }
+  };
+  
+
   return (
     <CardWrapper
       headerLabel="Welcome back"
@@ -25,7 +63,7 @@ const LoginForm = () => {
       showSocial
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(() => { })}
+        <form onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-6"
 
         >
@@ -48,9 +86,33 @@ const LoginForm = () => {
               </FormItem>
             )}
             />
+            <FormField
+            control={form.control}
+            name ="password"
+            render= {({field})=> (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                  {...field}
+                  placeholder="******"
+                  type="password"
+                  
+                  />
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+            />
 
           </div>
-
+          <FormError message = {error}/>
+          <FormSucess message = {success}/>
+<Button
+className="w-full"
+type="submit">
+  Login
+</Button>
         </form>
 
       </Form>

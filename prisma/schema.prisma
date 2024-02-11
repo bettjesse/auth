@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+// prisma/schema.prisma
+// datasource db {
+//   provider  = "postgresql"
+//   url  	    = env("DATABASE_URL")
+//   directUrl = env("DIRECT_URL")
+// }
+
+
+
+// model User {
+//   id            String    @id @default(cuid())
+//   name          String?
+//   email         String?   @unique
+//   emailVerified DateTime?
+//   image         String?
+//   password      String?
+//    createdAt DateTime @default(now())
+//    updatedAt DateTime @updatedAt
+//     followingIds    String[] @db.ObjectId
+//   hasNotification Boolean?
+  
+
+
+//   posts         Post[]
+//   comments      Comment[]
+//   notifications Notification[]
+//   accounts      Account[]
+
+// }
+
+// model Account {
+//   id                 String  @id @default(cuid())
+//   userId             String
+//   type               String
+//   provider           String
+//   providerAccountId  String
+//   refresh_token      String?  @db.Text
+//   access_token       String?  @db.Text
+//   expires_at         Int?
+//   token_type         String?
+//   scope              String?
+//   id_token           String?  @db.Text
+//   session_state      String?
+
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   @@unique([provider, providerAccountId])
+// }
+
+
+model User {
+   id String @id @default(auto()) @map("_id") @db.ObjectId
+   name String?
+  image String?
+  password      String?
+   bio String?
+   email String? @unique
+   emailVerified DateTime?
+   accounts Account[]
+  
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+    followingIds    String[] @db.ObjectId
+  hasNotification Boolean?
+  
+
+
+  posts         Post[]
+  comments      Comment[]
+  notifications Notification[]
+}
+
+model Post {
+  id                 String @id @default(auto()) @map("_id") @db.ObjectId
+  body               String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  userId             String @db.ObjectId
+  likedIds           String[] @db.ObjectId
+  image              String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  comments          Comment[]
+}
+
+model Comment {
+  id                 String @id @default(auto()) @map("_id") @db.ObjectId
+  body               String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  userId             String @db.ObjectId
+  postId             String @db.ObjectId
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id                 String @id @default(auto()) @map("_id") @db.ObjectId
+  body               String
+  userId             String @db.ObjectId
+  createdAt          DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+   id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String   @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+ 
+  refresh_token     String?  @db.String
+  access_token      String?  @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
